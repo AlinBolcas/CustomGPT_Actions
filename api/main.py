@@ -6,11 +6,17 @@ import json
 import os
 from datetime import datetime
 
+# Import our new router
+from api.replicate_router import router as replicate_router
+
 app = FastAPI(
     title="Creative Scene Generator API",
-    description="Generate creative scene descriptions for stories, screenplays, or games",
+    description="Generate creative scene descriptions and media for stories, screenplays, or games",
     version="1.0.0"
 )
+
+# Include the replicate router
+app.include_router(replicate_router)
 
 class SceneRequest(BaseModel):
     prompt: str
@@ -30,7 +36,7 @@ scenes_db = []
 
 @app.get("/")
 def read_root():
-    return {"status": "running", "service": "Scene Generator API"}
+    return {"status": "running", "service": "Scene Generator and Media Generation API"}
 
 @app.post("/generate-scene", response_model=SceneResponse)
 def generate_scene(req: SceneRequest):

@@ -1,17 +1,17 @@
 openapi: 3.1.0
 info:
-  title: Scene Generator API
+  title: Scene Generator and Media API
   version: 1.0.0
-  description: Generate creative scene descriptions for stories, screenplays, or games
+  description: Generate creative scene descriptions and media for stories, screenplays, or games
 servers:
-  - url: https://parking-wireless-noon-excited.trycloudflare.com
-    description: Production API Server
+  - url: https://customgpt-actions.onrender.com
+    description: Production API Server (Render.com)
 paths:
   /generate-scene:
     post:
       operationId: generateScene
       summary: Generate a creative scene description
-      description: Creates a vivid scene description based on the provided prompt and parameters
+      description: Creates a vivid scene description based on the provided prompt and optional parameters like mood, style, genre, and length
       requestBody:
         required: true
         content:
@@ -76,4 +76,120 @@ paths:
                       length:
                         type: string
                       word_count:
-                        type: integer 
+                        type: integer
+  /media/generate-image:
+    post:
+      operationId: generateImage
+      summary: Generate an image
+      description: Creates an image based on the provided prompt using either the flux-schnell or imagen-3-fast model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  description: The text description of the desired image
+                  example: "A futuristic city with flying cars"
+                model:
+                  type: string
+                  description: The model to use for image generation
+                  enum: [flux-schnell, imagen-3-fast]
+                  default: "flux-schnell"
+                negative_prompt:
+                  type: string
+                  description: Text describing what to avoid in the generated image
+                  example: "blurry, low quality"
+                aspect_ratio:
+                  type: string
+                  description: The aspect ratio of the generated image
+                  example: "16:9"
+                  default: "16:9"
+      responses:
+        '200':
+          description: Successfully generated image
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: URL to the generated image
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Timestamp of when the image was generated
+                  id:
+                    type: string
+                    description: Unique identifier for the generated image
+                  media_type:
+                    type: string
+                    description: Type of media generated
+                    enum: [image]
+                  prompt:
+                    type: string
+                    description: The prompt used to generate the image
+                  model:
+                    type: string
+                    description: The model used to generate the image
+  /media/generate-3d:
+    post:
+      operationId: generate3dModel
+      summary: Generate a 3D model from an image
+      description: Creates a 3D model based on the provided image URL using either hunyuan3d or trellis model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - image_url
+              properties:
+                image_url:
+                  type: string
+                  description: URL of the source image
+                  example: "https://example.com/image.jpg"
+                model:
+                  type: string
+                  description: The model to use for 3D generation
+                  enum: [hunyuan3d, trellis]
+                  default: "trellis"
+                seed:
+                  type: integer
+                  description: Random seed for reproducibility
+                  default: 1234
+                remove_background:
+                  type: boolean
+                  description: Whether to remove the image background
+                  default: true
+      responses:
+        '200':
+          description: Successfully generated 3D model
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: URL to the generated 3D model
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Timestamp of when the 3D model was generated
+                  id:
+                    type: string
+                    description: Unique identifier for the generated 3D model
+                  media_type:
+                    type: string
+                    description: Type of media generated
+                    enum: [3d_model]
+                  model:
+                    type: string
+                    description: The model used to generate the 3D model 

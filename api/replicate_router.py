@@ -38,7 +38,10 @@ class ThreeDGenerationRequest(BaseModel):
 class MediaResponse(BaseModel):
     url: Optional[str] = None  # Keep this for backward compatibility
     image_url: Optional[str] = None  # ChatGPT-friendly field for images
+    preview_url: Optional[str] = None  # Another ChatGPT-friendly field name
+    direct_url: Optional[str] = None  # Absolutely clear this is a full URL
     model_url: Optional[str] = None  # ChatGPT-friendly field for 3D models
+    download_url: Optional[str] = None  # Another explicitly named field
     created_at: str
     id: str
     media_type: str
@@ -141,10 +144,12 @@ def generate_image(req: ImageGenerationRequest):
         # Create description
         description = f"AI-generated image created from prompt: '{req.prompt}'"
         
-        # Create response - use image_url for ChatGPT-friendly display
+        # Create response - use multiple field names for better ChatGPT compatibility
         response = MediaResponse(
             url=image_url,  # Keep for backward compatibility
             image_url=image_url,  # ChatGPT-friendly field for auto-preview
+            preview_url=image_url,  # Alternative name that GPT might recognize
+            direct_url=image_url,  # Absolutely clear this is a direct URL
             created_at=datetime.now().isoformat(),
             id=media_id,
             media_type="image",
@@ -152,11 +157,12 @@ def generate_image(req: ImageGenerationRequest):
             model=req.model,
             file_type=file_type,
             description=description,
-            download_instructions="Right-click the image and select 'Save Image As...' to download",
+            download_instructions=f"Right-click the image and select 'Save Image As...' to download or visit {image_url} directly",
             metadata={
                 "negative_prompt": req.negative_prompt,
                 "aspect_ratio": req.aspect_ratio,
-                "generation_time": datetime.now().isoformat()
+                "generation_time": datetime.now().isoformat(),
+                "direct_image_url": image_url  # Also include in metadata for clarity
             }
         )
         
@@ -219,12 +225,14 @@ def generate_threed(req: ThreeDGenerationRequest):
         
         # Create description and download instructions
         description = f"3D model generated from image using {req.model}"
-        download_instruction = f"Click to download the {file_type.upper()} 3D model file"
+        download_instruction = f"Click to download the {file_type.upper()} 3D model file: {threed_url}"
         
-        # Create response - use model_url for ChatGPT-friendly display
+        # Create response - use multiple field names for better ChatGPT compatibility
         response = MediaResponse(
             url=threed_url,  # Keep for backward compatibility
             model_url=threed_url,  # ChatGPT-friendly field
+            download_url=threed_url,  # Alternative name that GPT might recognize
+            direct_url=threed_url,  # Absolutely clear this is a direct URL
             created_at=datetime.now().isoformat(),
             id=media_id,
             media_type="3d_model",
@@ -236,7 +244,8 @@ def generate_threed(req: ThreeDGenerationRequest):
                 "source_image": req.image_url,
                 "seed": req.seed,
                 "remove_background": req.remove_background,
-                "generation_time": datetime.now().isoformat()
+                "generation_time": datetime.now().isoformat(),
+                "direct_model_url": threed_url  # Also include in metadata for clarity
             }
         )
         

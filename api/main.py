@@ -26,7 +26,21 @@ app.include_router(replicate_router)
 
 @app.get("/")
 def read_root():
-    return {"status": "running", "service": "Media Generation API"}
+    """Root endpoint with API info"""
+    import platform
+    import sys
+    
+    return {
+        "status": "running",
+        "service": "Media Generation API",
+        "version": "1.1.0",
+        "documentation": "Use /docs for OpenAPI documentation",
+        "environment": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "replicate_configured": bool(os.environ.get("REPLICATE_API_TOKEN"))
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn

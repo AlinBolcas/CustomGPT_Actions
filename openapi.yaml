@@ -53,6 +53,12 @@ paths:
                   image_url:
                     type: string
                     description: URL to the generated image (ChatGPT-friendly field that triggers auto-preview)
+                  preview_url:
+                    type: string
+                    description: Alternative name for the direct image URL (for ChatGPT compatibility)
+                  direct_url:
+                    type: string
+                    description: Complete URL to directly access the generated image
                   created_at:
                     type: string
                     format: date-time
@@ -138,6 +144,12 @@ paths:
                   model_url:
                     type: string
                     description: URL to the generated 3D model (ChatGPT-friendly field)
+                  download_url:
+                    type: string
+                    description: Alternative name for direct download URL of the 3D model
+                  direct_url:
+                    type: string
+                    description: Complete URL to directly access the generated 3D model
                   created_at:
                     type: string
                     format: date-time

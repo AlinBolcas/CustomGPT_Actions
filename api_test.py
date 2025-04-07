@@ -37,8 +37,13 @@ def test_image_generation():
             result = response.json()
             print(f"Success! Image URL: {result['url']}")
             print(f"Media ID: {result['id']}")
+            print(f"File Type: {result.get('file_type', 'N/A')}")
             
-            # You could add download functionality here if needed
+            # Print metadata if available
+            if result.get('metadata'):
+                print("\nMetadata:")
+                for key, value in result['metadata'].items():
+                    print(f"  {key}: {value}")
             
         except Exception as e:
             print(f"Error generating image with {model}: {str(e)}")
@@ -76,8 +81,13 @@ def test_3d_generation():
             result = response.json()
             print(f"Success! 3D model URL: {result['url']}")
             print(f"Media ID: {result['id']}")
+            print(f"File Type: {result.get('file_type', 'N/A')}")
             
-            # You could add download functionality here if needed
+            # Print metadata if available
+            if result.get('metadata'):
+                print("\nMetadata:")
+                for key, value in result['metadata'].items():
+                    print(f"  {key}: {value}")
             
         except Exception as e:
             print(f"Error generating 3D model with {model}: {str(e)}")

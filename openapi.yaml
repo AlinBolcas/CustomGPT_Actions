@@ -1,0 +1,79 @@
+openapi: 3.1.0
+info:
+  title: Scene Generator API
+  version: 1.0.0
+  description: Generate creative scene descriptions for stories, screenplays, or games
+servers:
+  - url: https://parking-wireless-noon-excited.trycloudflare.com
+    description: Production API Server
+paths:
+  /generate-scene:
+    post:
+      operationId: generateScene
+      summary: Generate a creative scene description
+      description: Creates a vivid scene description based on the provided prompt and parameters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  description: The basic scene concept or prompt to elaborate on
+                  example: "A character discovers an ancient artifact"
+                mood:
+                  type: string
+                  description: The emotional tone of the scene
+                  example: "mysterious"
+                  default: "neutral"
+                style:
+                  type: string
+                  description: The writing style to generate
+                  example: "cinematic"
+                  default: "descriptive"
+                genre:
+                  type: string
+                  description: The genre of the scene
+                  example: "fantasy"
+                  default: "fantasy"
+                length:
+                  type: string
+                  description: The desired length of the scene description
+                  enum: [short, medium, long]
+                  default: "medium"
+      responses:
+        '200':
+          description: Successfully generated scene
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scene_description:
+                    type: string
+                    description: The generated scene description
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Timestamp of when the scene was generated
+                  id:
+                    type: string
+                    description: Unique identifier for the generated scene
+                  metadata:
+                    type: object
+                    description: Additional information about the generated scene
+                    properties:
+                      mood:
+                        type: string
+                      style:
+                        type: string
+                      genre:
+                        type: string
+                      length:
+                        type: string
+                      word_count:
+                        type: integer 

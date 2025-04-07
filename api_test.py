@@ -35,9 +35,25 @@ def test_image_generation():
             response.raise_for_status()  # Raise exception for HTTP errors
             
             result = response.json()
-            print(f"Success! Image URL: {result['url']}")
+            
+            # Check for ChatGPT-friendly fields
+            if "image_url" in result:
+                print(f"✅ Success! Image URL (ChatGPT-friendly): {result['image_url']}")
+            else:
+                print(f"❌ Missing image_url field")
+                
+            if "url" in result:
+                print(f"Legacy URL: {result['url']}")
+                
             print(f"Media ID: {result['id']}")
             print(f"File Type: {result.get('file_type', 'N/A')}")
+            
+            # Print description and download instructions
+            if "description" in result:
+                print(f"Description: {result['description']}")
+                
+            if "download_instructions" in result:
+                print(f"Download Instructions: {result['download_instructions']}")
             
             # Print metadata if available
             if result.get('metadata'):
@@ -79,9 +95,25 @@ def test_3d_generation():
             response.raise_for_status()  # Raise exception for HTTP errors
             
             result = response.json()
-            print(f"Success! 3D model URL: {result['url']}")
+            
+            # Check for ChatGPT-friendly fields
+            if "model_url" in result:
+                print(f"✅ Success! Model URL (ChatGPT-friendly): {result['model_url']}")
+            else:
+                print(f"❌ Missing model_url field")
+                
+            if "url" in result:
+                print(f"Legacy URL: {result['url']}")
+                
             print(f"Media ID: {result['id']}")
             print(f"File Type: {result.get('file_type', 'N/A')}")
+            
+            # Print description and download instructions
+            if "description" in result:
+                print(f"Description: {result['description']}")
+                
+            if "download_instructions" in result:
+                print(f"Download Instructions: {result['download_instructions']}")
             
             # Print metadata if available
             if result.get('metadata'):

@@ -36,13 +36,17 @@ class ThreeDGenerationRequest(BaseModel):
 
 # Response models
 class MediaResponse(BaseModel):
-    url: str
+    url: Optional[str] = None  # Keep this for backward compatibility
+    image_url: Optional[str] = None  # ChatGPT-friendly field for images
+    model_url: Optional[str] = None  # ChatGPT-friendly field for 3D models
     created_at: str
     id: str
     media_type: str
     prompt: Optional[str] = None
     model: str
     file_type: Optional[str] = None  # For example: jpg, png, glb, obj
+    description: Optional[str] = None  # ChatGPT-friendly description field
+    download_instructions: Optional[str] = None  # Direct field for download instructions 
     metadata: Optional[Dict] = None  # Additional metadata
 
 # Helper function to extract URL from various types of Replicate outputs
@@ -134,19 +138,24 @@ def generate_image(req: ImageGenerationRequest):
             if file_type == "jpeg":
                 file_type = "jpg"
                 
-        # Create response
+        # Create description
+        description = f"AI-generated image created from prompt: '{req.prompt}'"
+        
+        # Create response - use image_url for ChatGPT-friendly display
         response = MediaResponse(
-            url=image_url,
+            url=image_url,  # Keep for backward compatibility
+            image_url=image_url,  # ChatGPT-friendly field for auto-preview
             created_at=datetime.now().isoformat(),
             id=media_id,
             media_type="image",
             prompt=req.prompt,
             model=req.model,
             file_type=file_type,
+            description=description,
+            download_instructions="Right-click the image and select 'Save Image As...' to download",
             metadata={
                 "negative_prompt": req.negative_prompt,
                 "aspect_ratio": req.aspect_ratio,
-                "download_instructions": "Right-click the image and select 'Save Image As...' to download",
                 "generation_time": datetime.now().isoformat()
             }
         )
@@ -208,19 +217,25 @@ def generate_threed(req: ThreeDGenerationRequest):
         if threed_url.lower().endswith((".glb", ".obj", ".fbx", ".usdz", ".stl")):
             file_type = threed_url.lower().split(".")[-1]
         
-        # Create response
+        # Create description and download instructions
+        description = f"3D model generated from image using {req.model}"
+        download_instruction = f"Click to download the {file_type.upper()} 3D model file"
+        
+        # Create response - use model_url for ChatGPT-friendly display
         response = MediaResponse(
-            url=threed_url,
+            url=threed_url,  # Keep for backward compatibility
+            model_url=threed_url,  # ChatGPT-friendly field
             created_at=datetime.now().isoformat(),
             id=media_id,
             media_type="3d_model",
             model=req.model,
             file_type=file_type,
+            description=description,
+            download_instructions=download_instruction,
             metadata={
                 "source_image": req.image_url,
                 "seed": req.seed,
                 "remove_background": req.remove_background,
-                "download_instructions": f"Click on the link to download the 3D model in {file_type.upper()} format. You may need appropriate software to view the model.",
                 "generation_time": datetime.now().isoformat()
             }
         )

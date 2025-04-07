@@ -49,7 +49,10 @@ paths:
                 properties:
                   url:
                     type: string
-                    description: URL to the generated image
+                    description: URL to the generated image (legacy field)
+                  image_url:
+                    type: string
+                    description: URL to the generated image (ChatGPT-friendly field that triggers auto-preview)
                   created_at:
                     type: string
                     format: date-time
@@ -70,6 +73,12 @@ paths:
                   file_type:
                     type: string
                     description: The file type of the generated image (jpg, png, etc.)
+                  description:
+                    type: string
+                    description: Description of the generated image
+                  download_instructions:
+                    type: string
+                    description: Instructions for downloading the image
                   metadata:
                     type: object
                     description: Additional information about the generated image
@@ -80,9 +89,6 @@ paths:
                       aspect_ratio:
                         type: string
                         description: The aspect ratio of the generated image
-                      download_instructions:
-                        type: string
-                        description: Instructions for downloading the image
                       generation_time:
                         type: string
                         format: date-time
@@ -128,7 +134,10 @@ paths:
                 properties:
                   url:
                     type: string
-                    description: URL to the generated 3D model
+                    description: URL to the generated 3D model (legacy field)
+                  model_url:
+                    type: string
+                    description: URL to the generated 3D model (ChatGPT-friendly field)
                   created_at:
                     type: string
                     format: date-time
@@ -146,6 +155,12 @@ paths:
                   file_type:
                     type: string
                     description: The file format of the generated 3D model (glb, obj, fbx, etc.)
+                  description:
+                    type: string
+                    description: Description of the generated 3D model
+                  download_instructions:
+                    type: string
+                    description: Instructions for downloading and using the 3D model
                   metadata:
                     type: object
                     description: Additional information about the generated 3D model
@@ -159,9 +174,6 @@ paths:
                       remove_background:
                         type: boolean
                         description: Whether background removal was applied
-                      download_instructions:
-                        type: string
-                        description: Instructions for downloading and using the 3D model
                       generation_time:
                         type: string
                         format: date-time

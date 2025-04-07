@@ -42,6 +42,58 @@ class MediaResponse(BaseModel):
     media_type: str
     prompt: Optional[str] = None
     model: str
+    file_type: Optional[str] = None  # For example: jpg, png, glb, obj
+    metadata: Optional[Dict] = None  # Additional metadata
+
+# Helper function to extract URL from various types of Replicate outputs
+def extract_url(output):
+    """Extract URL string from Replicate output regardless of its type."""
+    if output is None:
+        return None
+        
+    # If it's already a string URL, return it directly
+    if isinstance(output, str):
+        return output
+        
+    # If it has a url attribute (FileOutput object)
+    if hasattr(output, 'url'):
+        return output.url
+        
+    # If it's a dictionary with a url key
+    if isinstance(output, dict):
+        # For Hunyuan3D model which returns {'mesh': FileOutput} structure 
+        if 'mesh' in output:
+            if hasattr(output['mesh'], 'url'):
+                return output['mesh'].url
+            elif isinstance(output['mesh'], str):
+                return output['mesh']
+                
+        # For Trellis model which returns {'model_file': FileOutput} structure
+        elif 'model_file' in output:
+            if hasattr(output['model_file'], 'url'):
+                return output['model_file'].url
+            elif isinstance(output['model_file'], str):
+                return output['model_file']
+                
+        # Standard dictionary with 'url' key
+        elif 'url' in output:
+            return output['url']
+            
+        # Last resort - try to find any value that has a URL attribute
+        for key, value in output.items():
+            if hasattr(value, 'url'):
+                return value.url
+        
+    # If it's a list and the first item has a url attribute
+    if isinstance(output, list) and len(output) > 0:
+        if isinstance(output[0], str):
+            return output[0]
+        elif hasattr(output[0], 'url'):
+            return output[0].url
+            
+    # If we got here, we couldn't extract a URL
+    print(f"Could not extract URL from output: {type(output)}, {output}")
+    return None
 
 # Routes
 @router.post("/generate-image", response_model=MediaResponse)
@@ -56,22 +108,32 @@ def generate_image(req: ImageGenerationRequest):
             )
         
         # Generate image
-        image_url = replicate_api.generate_image(
+        image_output = replicate_api.generate_image(
             prompt=req.prompt,
             model=req.model,
             negative_prompt=req.negative_prompt,
             aspect_ratio=req.aspect_ratio
         )
         
+        # Extract URL from output
+        image_url = extract_url(image_output)
+        
         if not image_url:
             raise HTTPException(
                 status_code=500,
-                detail="Failed to generate image"
+                detail="Failed to extract URL from image generation output"
             )
         
         # Generate a unique ID
         media_id = f"img_{datetime.now().strftime('%Y%m%d%H%M%S')}"
         
+        # Determine file type from URL
+        file_type = "jpg"  # Default
+        if image_url.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")):
+            file_type = image_url.lower().split(".")[-1]
+            if file_type == "jpeg":
+                file_type = "jpg"
+                
         # Create response
         response = MediaResponse(
             url=image_url,
@@ -79,7 +141,14 @@ def generate_image(req: ImageGenerationRequest):
             id=media_id,
             media_type="image",
             prompt=req.prompt,
-            model=req.model
+            model=req.model,
+            file_type=file_type,
+            metadata={
+                "negative_prompt": req.negative_prompt,
+                "aspect_ratio": req.aspect_ratio,
+                "download_instructions": "Right-click the image and select 'Save Image As...' to download",
+                "generation_time": datetime.now().isoformat()
+            }
         )
         
         return response
@@ -101,23 +170,43 @@ def generate_threed(req: ThreeDGenerationRequest):
                 status_code=400, 
                 detail="Model must be either 'hunyuan3d' or 'trellis'"
             )
+            
+        # Validate image URL
+        if not req.image_url or not isinstance(req.image_url, str) or not req.image_url.startswith(('http://', 'https://')):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid image URL. Must be a valid URL starting with http:// or https://"
+            )
         
         # Generate 3D model
-        threed_url = replicate_api.generate_threed(
+        threed_output = replicate_api.generate_threed(
             image_url=req.image_url,
             model=req.model,
             seed=req.seed,
             remove_background=req.remove_background
         )
         
+        # Debugging output to help understand what's returned
+        print(f"3D model output type: {type(threed_output)}")
+        if isinstance(threed_output, dict):
+            print(f"3D model output keys: {threed_output.keys()}")
+        
+        # Extract URL from output
+        threed_url = extract_url(threed_output)
+        
         if not threed_url:
             raise HTTPException(
                 status_code=500,
-                detail="Failed to generate 3D model"
+                detail="Failed to extract URL from 3D model generation output"
             )
         
         # Generate a unique ID
         media_id = f"3d_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        
+        # Determine file type from URL
+        file_type = "glb"  # Default
+        if threed_url.lower().endswith((".glb", ".obj", ".fbx", ".usdz", ".stl")):
+            file_type = threed_url.lower().split(".")[-1]
         
         # Create response
         response = MediaResponse(
@@ -125,7 +214,15 @@ def generate_threed(req: ThreeDGenerationRequest):
             created_at=datetime.now().isoformat(),
             id=media_id,
             media_type="3d_model",
-            model=req.model
+            model=req.model,
+            file_type=file_type,
+            metadata={
+                "source_image": req.image_url,
+                "seed": req.seed,
+                "remove_background": req.remove_background,
+                "download_instructions": f"Click on the link to download the 3D model in {file_type.upper()} format. You may need appropriate software to view the model.",
+                "generation_time": datetime.now().isoformat()
+            }
         )
         
         return response

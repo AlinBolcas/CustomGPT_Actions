@@ -137,6 +137,26 @@ paths:
                   model:
                     type: string
                     description: The model used to generate the image
+                  file_type:
+                    type: string
+                    description: The file type of the generated image (jpg, png, etc.)
+                  metadata:
+                    type: object
+                    description: Additional information about the generated image
+                    properties:
+                      negative_prompt:
+                        type: string
+                        description: The negative prompt used for generation
+                      aspect_ratio:
+                        type: string
+                        description: The aspect ratio of the generated image
+                      download_instructions:
+                        type: string
+                        description: Instructions for downloading the image
+                      generation_time:
+                        type: string
+                        format: date-time
+                        description: The exact time when the image was generated
   /media/generate-3d:
     post:
       operationId: generate3dModel
@@ -192,4 +212,27 @@ paths:
                     enum: [3d_model]
                   model:
                     type: string
-                    description: The model used to generate the 3D model 
+                    description: The model used to generate the 3D model
+                  file_type:
+                    type: string
+                    description: The file format of the generated 3D model (glb, obj, fbx, etc.)
+                  metadata:
+                    type: object
+                    description: Additional information about the generated 3D model
+                    properties:
+                      source_image:
+                        type: string
+                        description: The URL of the source image used for generation
+                      seed:
+                        type: integer
+                        description: The random seed used for generation
+                      remove_background:
+                        type: boolean
+                        description: Whether background removal was applied
+                      download_instructions:
+                        type: string
+                        description: Instructions for downloading and using the 3D model
+                      generation_time:
+                        type: string
+                        format: date-time
+                        description: The exact time when the 3D model was generated 

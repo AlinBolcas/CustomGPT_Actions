@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Base URL for API
-BASE_URL = "http://localhost:8000"  # Change this to your actual API URL when deployed
+BASE_URL = "https://customgpt-actions.onrender.com"  # Changed from localhost to the deployed render.com URL
 
 def test_image_generation():
     """Test generating an image with both available models."""
